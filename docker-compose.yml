@@ -29,9 +29,9 @@ services:
       image: busybox
       tty: true
       volumes:
-          - grafana: /var/lib/grafana
-          - grafana-log: /var/log/grafana
-          - grafana-plugin: /var/lib/grafana/plugins
+          - grafana:/var/lib/grafana
+          - grafana-log:/var/log/grafana
+          - grafana-plugin:/var/lib/grafana/plugins
   influxdb:
       build: ./influxdb
       ports:
@@ -42,13 +42,13 @@ services:
           INLFUX_ADMIN_USER: "grafana"
           INFLUX_ADMIN_PASS: "grafana"
       volumes:
-          - influxdb-data: /var/lib/influxdb
+          - influxdb-data:/var/lib/influxdb
 
   influxdb-data:
       image: busybox
       tty: true
       volumes:
-          - influxdb-data: /var/lib/influxdb
+          - influxdb-data:/var/lib/influxdb
 
   telegraf:
       build: ./telegraf
