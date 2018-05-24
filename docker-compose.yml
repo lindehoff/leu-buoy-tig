@@ -20,9 +20,9 @@ services:
           LETSENCRYPT_HOST: buoy.lnu.rocks
           LETSENCRYPT_EMAIL: jacob@lindehoff.com
       volumes:
-          - grafana: /var/lib/grafana
-          - grafana-log: /var/log/grafana
-          - grafana-plugin: /var/lib/grafana/plugins
+          - grafana:/var/lib/grafana
+          - grafana-log:/var/log/grafana
+          - grafana-plugin:/var/lib/grafana/plugins
       restart: always
 
   grafana-data:
