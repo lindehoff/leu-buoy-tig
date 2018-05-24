@@ -76,7 +76,7 @@ networks:
          name: webproxy
 
 volumes:
-  grafana
-  grafana-log
-  grafana-plugin
-  influxdb-data
+  grafana:
+  grafana-log:
+  grafana-plugin:
+  influxdb-data:
