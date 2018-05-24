@@ -1,79 +1,90 @@
 version: "3"
 services:
   grafana:
-      build: ./grafana
-      ports:
-          - 3000
-      links:
-          - influxdb:influxdb
-      environment:
-          GF_SECURITY_ADMIN_USER: admin
-          GF_SECURITY_ADMIN_PASSWORD: admin
-          GF_SECURITY_SECRET_KEY: grafana
-          GF_USERS_ALLOW_SIGN_UP: "true"
-          GF_USERS_ALLOW_ORG_CREATE: "true"
-          GF_AUTH_ANONYMOUS_ENABLED: "true"
-          GF_AUTH_ANONYMOUS_ORG_NAME: grafana
-          GF_DASHBOARDS_JSON_ENABLED: "true"
-          GF_DASHBOARDS_JSON_PATH: /opt/grafana
-          VIRTUAL_HOST: buoy.lnu.rocks
-          LETSENCRYPT_HOST: buoy.lnu.rocks
-          LETSENCRYPT_EMAIL: jacob@lindehoff.com
-      volumes:
-          - grafana:/var/lib/grafana
-          - grafana-log:/var/log/grafana
-          - grafana-plugin:/var/lib/grafana/plugins
-      restart: always
+    build: ./grafana
+    ports:
+      - 3000
+    links:
+      - influxdb:influxdb
+    networks:
+      - webproxy
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_SECURITY_SECRET_KEY: grafana
+      GF_USERS_ALLOW_SIGN_UP: "true"
+      GF_USERS_ALLOW_ORG_CREATE: "true"
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_NAME: grafana
+      GF_DASHBOARDS_JSON_ENABLED: "true"
+      GF_DASHBOARDS_JSON_PATH: /opt/grafana
+      VIRTUAL_HOST: buoy.lnu.rocks
+      LETSENCRYPT_HOST: buoy.lnu.rocks
+      LETSENCRYPT_EMAIL: jacob@lindehoff.com
+    volumes:
+      - grafana:/var/lib/grafana
+      - grafana-log:/var/log/grafana
+      - grafana-plugin:/var/lib/grafana/plugins
+    restart: always
 
   grafana-data:
-      image: busybox
-      tty: true
-      volumes:
-          - grafana:/var/lib/grafana
-          - grafana-log:/var/log/grafana
-          - grafana-plugin:/var/lib/grafana/plugins
+    image: busybox
+    tty: true
+    networks:
+      - webproxy
+    volumes:
+      - grafana:/var/lib/grafana
+      - grafana-log:/var/log/grafana
+      - grafana-plugin:/var/lib/grafana/plugins
+  
   influxdb:
-      build: ./influxdb
-      ports:
-          - 8083
-          - 8086
-      environment:
-          INFLUX_DATABASE: "telegraf"
-          INLFUX_ADMIN_USER: "grafana"
-          INFLUX_ADMIN_PASS: "grafana"
-      volumes:
-          - influxdb-data:/var/lib/influxdb
+    build: ./influxdb
+    ports:
+      - 8083
+      - 8086
+    networks:
+      - webproxy
+    environment:
+      INFLUX_DATABASE: "telegraf"
+      INLFUX_ADMIN_USER: "grafana"
+      INFLUX_ADMIN_PASS: "grafana"
+    volumes:
+      - influxdb-data:/var/lib/influxdb
 
   influxdb-data:
-      image: busybox
-      tty: true
-      volumes:
-          - influxdb-data:/var/lib/influxdb
+    image: busybox
+    tty: true
+    networks:
+      - webproxy
+    volumes:
+      - influxdb-data:/var/lib/influxdb
 
   telegraf:
-      build: ./telegraf
-      links:
-          - influxdb:influxdb
-      ports:
-          - 1619
-      environment:
-          HOST_NAME: "telegraf"
-          INFLUXDB_HOST: "influxdb"
-          INFLUXDB_PORT: "8086"
-          DATABASE: "telegraf"
-          VIRTUAL_HOST: telegraf.buoy.lnu.rocks
-          LETSENCRYPT_HOST: telegraf.buoy.lnu.rocks
-          LETSENCRYPT_EMAIL: jacob@lindehoff.com
-          VIRTUAL_PORT: 1619
-      tty: true
-      volumes:
-          - /var/run/docker.sock:/var/run/docker.sock
-      privileged: true
+    build: ./telegraf
+    links:
+      - influxdb:influxdb
+    networks:
+      - webproxy
+    ports:
+      - 1619
+    environment:
+      HOST_NAME: "telegraf"
+      INFLUXDB_HOST: "influxdb"
+      INFLUXDB_PORT: "8086"
+      DATABASE: "telegraf"
+      VIRTUAL_HOST: telegraf.buoy.lnu.rocks
+      LETSENCRYPT_HOST: telegraf.buoy.lnu.rocks
+      LETSENCRYPT_EMAIL: jacob@lindehoff.com
+      VIRTUAL_PORT: 1619
+    tty: true
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    privileged: true
 
 networks:
-    default:
-       external:
-         name: webproxy
+  default:
+    external:
+      name: webproxy
 
 volumes:
   grafana:
