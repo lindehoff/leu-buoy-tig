@@ -6,8 +6,6 @@ services:
       - 3000
     links:
       - influxdb:influxdb
-    networks:
-      - webproxy
     environment:
       GF_SECURITY_ADMIN_USER: admin
       GF_SECURITY_ADMIN_PASSWORD: admin
@@ -30,8 +28,6 @@ services:
   grafana-data:
     image: busybox
     tty: true
-    networks:
-      - webproxy
     volumes:
       - grafana:/var/lib/grafana
       - grafana-log:/var/log/grafana
@@ -42,8 +38,6 @@ services:
     ports:
       - 8083
       - 8086
-    networks:
-      - webproxy
     environment:
       INFLUX_DATABASE: "telegraf"
       INLFUX_ADMIN_USER: "grafana"
@@ -54,8 +48,6 @@ services:
   influxdb-data:
     image: busybox
     tty: true
-    networks:
-      - webproxy
     volumes:
       - influxdb-data:/var/lib/influxdb
 
@@ -63,8 +55,6 @@ services:
     build: ./telegraf
     links:
       - influxdb:influxdb
-    networks:
-      - webproxy
     ports:
       - 1619
     environment:
@@ -81,10 +71,6 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     privileged: true
 
-networks:
-  default:
-    external:
-      name: webproxy
 
 volumes:
   grafana:
